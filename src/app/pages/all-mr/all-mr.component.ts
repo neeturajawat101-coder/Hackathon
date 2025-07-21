@@ -6,7 +6,9 @@ import { GitLabService } from '../../services/gitlab.service';
 import { AgGridAngular } from 'ag-grid-angular'; // Angular Data Grid Component
 import type { ColDef } from 'ag-grid-community'; // Column Definition Type Interface
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
-import { SetFilterModule } from 'ag-grid-enterprise'; 
+import { SetFilterModule } from 'ag-grid-enterprise';
+import { Dialog } from '@angular/cdk/dialog'; 
+import { Modal } from '../../modal/modal';
 
 ModuleRegistry.registerModules([ AllCommunityModule, SetFilterModule ]); 
 
@@ -31,7 +33,8 @@ export class AllMRComponent implements OnInit, AfterViewInit {
     private gitLabService: GitLabService,
     private router: Router,
     private ngZone: NgZone,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private dialog: Dialog
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
@@ -39,8 +42,16 @@ export class AllMRComponent implements OnInit, AfterViewInit {
   colDefs: ColDef[] = [
     { field: 'mrId', headerName: 'MR ID', filter: 'agSetColumnFilter' },
     { field: 'title', headerName: 'Title', filterParams: { suppressAndOrCondition: true, suppressFilterButton: true } },
-    { field: 'jiraLink', headerName: 'Jira' },
-    { field: 'webUrl', headerName: 'MR' },
+    { field: 'jiraLink', headerName: 'Jira',
+      cellRenderer: (params: any) => {
+        return `<a href="${params.data.jiraLink}  target="_blank">Jira</a>`;
+      }
+    },
+    { field: 'webUrl', headerName: 'MR',
+      cellRenderer: (params: any) => {
+        return `<a href="${params.data.webUrl}  target="_blank">MR</a>`;
+      }
+     },
     { field: 'priority', headerName: 'Priority', filter: 'agSetColumnFilter' },
     { field: 'squads', headerName: 'Squads', filter: 'agSetColumnFilter' },
     { field: 'status', headerName: 'Status', filter: 'agSetColumnFilter' },
@@ -65,6 +76,7 @@ export class AllMRComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     // Don't load data immediately, wait for AfterViewInit
+    this.openModal();
   }
 
   ngAfterViewInit(): void {
@@ -306,7 +318,10 @@ export class AllMRComponent implements OnInit, AfterViewInit {
     // Navigate to summary page with MR data in state (not URL)
     this.router.navigate(['/summary'], {
       state: {
-        mrData: mr
+        mrData: {
+          ...mr,
+          mr: mr.mrId
+        }
       }
     });
   }
@@ -382,4 +397,17 @@ export class AllMRComponent implements OnInit, AfterViewInit {
       default: return 'Open';
     }
   }
+
+  openModal(data?: any): void {
+    const dialogRef = this.dialog.open(Modal, {
+      data: data,
+      width: '500px',
+      height: '400px'
+    });
+
+    dialogRef.closed.subscribe(result => {
+      console.log('Modal closed', result);
+    });
+  }
+
 }
