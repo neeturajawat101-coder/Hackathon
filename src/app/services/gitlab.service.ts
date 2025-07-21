@@ -90,9 +90,9 @@ export interface MRAnalysisData {
   providedIn: 'root',
 })
 export class GitLabService {
-  private gitlabApiUrl = '';
-    private gitlabToken = '';
-    private projectId = '';
+  private gitlabApiUrl = 'https://vie.git.bwinparty.com/api/v4';
+    private gitlabToken = 'glpat-Fz6KK4Zjyaf3QBxsoezV';
+    private projectId = '502';
 
   constructor(private http: HttpClient) {}
 

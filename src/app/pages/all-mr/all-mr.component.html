@@ -3,12 +3,9 @@
     <div class="header-content">
       <h1>All MR ({{ mrList.length }})</h1>
       <div class="header-actions">
-        <button class="refresh-btn" (click)="refreshData()" title="Refresh Data">
-          🔄 Refresh
-        </button>
         <button class="create-btn" (click)="createCGReviewRequest()">
           <span class="btn-icon">➕</span>
-          Create CG Review Request
+          Create Review Request
         </button>
       </div>
     </div>
@@ -35,6 +32,7 @@
           <th>Status</th>
           <th>Reviewer</th>
           <th>AI Summary</th>
+          <th>Refresh</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -73,6 +71,17 @@
               <span *ngIf="generatingSummary === mr.id" class="loading">Generating...</span>
             </button>
           </td>
+          <td class="refresh-cell">
+            <button 
+              class="refresh-mr-btn" 
+              (click)="refreshSingleMR(mr, $event)"
+              [disabled]="refreshingMRId === mr.id"
+              title="Refresh MR Data"
+            >
+              <span *ngIf="refreshingMRId !== mr.id">🔄</span>
+              <span *ngIf="refreshingMRId === mr.id" class="loading">⏳</span>
+            </button>
+          </td>
           <td class="action-cell">
             <span class="action-text">{{ mr.action }}</span>
             <button 
@@ -87,11 +96,11 @@
         
         <!-- Empty state when no MRs -->
         <tr *ngIf="mrList.length === 0" class="empty-row">
-          <td colspan="10" class="empty-cell">
+          <td colspan="11" class="empty-cell">
             <div class="empty-state">
               <p>No merge requests found</p>
               <button class="create-btn-secondary" (click)="createCGReviewRequest()">
-                Create your first CG Review Request
+                Create your Review Request
               </button>
             </div>
           </td>

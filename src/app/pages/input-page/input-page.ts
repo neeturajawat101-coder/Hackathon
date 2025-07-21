@@ -129,7 +129,7 @@ export class InputPageComponent {
 
     this.firebaseService.createMR(mrDataToSave).subscribe({
       next: (firebaseId) => {
-        this.successMessage = `MR ${this.formData.mr} successfully saved to Firebase!`;
+        this.successMessage = `MR ${this.formData.mr} successfully saved!`;
         this.resetForm();
         
         // Navigate to All MRs page after a short delay
@@ -138,8 +138,8 @@ export class InputPageComponent {
         }, 2000);
       },
       error: (firebaseError) => {
-        console.error('Failed to save to Firebase:', firebaseError);
-        this.errorMessage = 'Failed to save to Firebase. Please try again.';
+        console.error('Failed to save the MR:', firebaseError);
+        this.errorMessage = 'Failed to save the MR. Please try again.';
       },
       complete: () => {
         this.isLoading = false;
