@@ -6,7 +6,9 @@ import { GitLabService } from '../../services/gitlab.service';
 import { AgGridAngular } from 'ag-grid-angular'; // Angular Data Grid Component
 import type { ColDef } from 'ag-grid-community'; // Column Definition Type Interface
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
-import { SetFilterModule } from 'ag-grid-enterprise'; 
+import { SetFilterModule } from 'ag-grid-enterprise';
+import { Dialog } from '@angular/cdk/dialog'; 
+import { Modal } from '../../modal/modal';
 
 ModuleRegistry.registerModules([ AllCommunityModule, SetFilterModule ]); 
 
@@ -31,7 +33,8 @@ export class AllMRComponent implements OnInit, AfterViewInit {
     private gitLabService: GitLabService,
     private router: Router,
     private ngZone: NgZone,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private dialog: Dialog
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
@@ -306,6 +309,7 @@ export class AllMRComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     // Don't load data immediately, wait for AfterViewInit
+    this.openModal();
   }
 
   ngAfterViewInit(): void {
@@ -651,4 +655,17 @@ export class AllMRComponent implements OnInit, AfterViewInit {
       default: return 'Open';
     }
   }
+
+  openModal(data?: any): void {
+    const dialogRef = this.dialog.open(Modal, {
+      data: data,
+      width: '500px',
+      height: '400px'
+    });
+
+    dialogRef.closed.subscribe(result => {
+      console.log('Modal closed', result);
+    });
+  }
+
 }
