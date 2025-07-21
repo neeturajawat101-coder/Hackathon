@@ -4,11 +4,12 @@ import { GitLabService } from '../../services/gitlab.service';
 import { FirebaseService } from '../../services/firebase.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { SuccessNotificationComponent } from '../../components/success-notification/success-notification.component';
 
 @Component({
   selector: 'app-input-page',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, SuccessNotificationComponent],
   templateUrl: './input-page.html',
   styleUrls: ['./input-page.scss'],
 })
@@ -18,6 +19,7 @@ export class InputPageComponent {
   errorMessage: string = '';
   successMessage: string = '';
   showForm: boolean = false;
+  showNotification: boolean = false;
 
   // Form fields for MR details
   formData = {
@@ -129,19 +131,13 @@ export class InputPageComponent {
 
     this.firebaseService.createMR(mrDataToSave).subscribe({
       next: (firebaseId) => {
-        this.successMessage = `MR ${this.formData.mr} successfully saved!`;
+        this.isLoading = false;
+        this.showNotification = true;
         this.resetForm();
-        
-        // Navigate to All MRs page after a short delay
-        setTimeout(() => {
-          this.router.navigate(['/all-mr']);
-        }, 2000);
       },
       error: (firebaseError) => {
         console.error('Failed to save the MR:', firebaseError);
         this.errorMessage = 'Failed to save the MR. Please try again.';
-      },
-      complete: () => {
         this.isLoading = false;
       }
     });
@@ -199,6 +195,16 @@ export class InputPageComponent {
     
     console.log('No Jira link found');
     return '';
+  }
+
+  // Notification event handlers
+  onGoToDashboard(): void {
+    this.showNotification = false;
+    this.router.navigate(['/all-mr']);
+  }
+
+  onCloseNotification(): void {
+    this.showNotification = false;
   }
 
   private extractPriority(labels: string[]): 'High' | 'Medium' | 'Low' {

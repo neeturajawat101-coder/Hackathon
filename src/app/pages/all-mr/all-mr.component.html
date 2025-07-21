@@ -11,14 +11,22 @@
     </div>
   </div>
 
-  <ag-grid-angular 
-    *ngIf="isBrowser && !isLoading && !errorMessage"
-     style="height: 500px;"
+  <!-- AG Grid Table -->
+  <div class="ag-grid-container" *ngIf="isBrowser && !isLoading && !errorMessage">
+    <ag-grid-angular 
+      class="ag-theme-alpine modern-grid"
+      style="height: 100%; width: 100%; min-height: 600px;"
       [rowData]="rowData" 
-      [columnDefs]="colDefs">
+      [columnDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      [gridOptions]="gridOptions"
+      (rowClicked)="onRowClicked($event)"
+      (gridReady)="onGridReady($event)">
     </ag-grid-angular>
+  </div>
 
-  <div class="table-container" *ngIf="!isLoading && !errorMessage">
+  <!-- Legacy table - hidden in favor of AG Grid -->
+  <div class="table-container" *ngIf="false && !isLoading && !errorMessage" style="display: none;">
 
     <table class="mr-table">
       <thead>
@@ -37,7 +45,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let mr of mrList" (click)="viewMRDetails(mr)" class="mr-row">
+        <tr *ngFor="let mr of mrList" class="mr-row">
+          <!-- (click)="viewMRDetails(mr)" -->
           <td>{{ mr.mr || mr.mrId || '-' }}</td>
           <td class="title-cell">{{ mr.title }}</td>
           <td>

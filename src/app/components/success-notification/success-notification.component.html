@@ -1,0 +1,78 @@
+<div class="notification-overlay" *ngIf="show" @fadeInOut (click)="closeNotification()">
+  <div class="notification-popup" @slideInOut (click)="$event.stopPropagation()">
+    <!-- Success Icon with Animation -->
+    <div class="icon-container">
+      <div class="success-icon">
+        <!-- Static Success Image -->
+        <div class="success-image">
+          <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Green Circle Background -->
+            <circle cx="50" cy="50" r="45" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2"/>
+            
+            <!-- Merge Request Icon - Git Branch -->
+            <g transform="translate(20, 25)">
+              <!-- Main branch line -->
+              <path d="M15 5 L15 45" stroke="#4CAF50" stroke-width="3" stroke-linecap="round"/>
+              <!-- Feature branch -->
+              <path d="M15 15 Q25 15 35 25 L35 35 Q35 40 40 40 L50 40" stroke="#4CAF50" stroke-width="3" stroke-linecap="round" fill="none"/>
+              <!-- Merge point -->
+              <path d="M15 40 L50 40" stroke="#4CAF50" stroke-width="3" stroke-linecap="round"/>
+              
+              <!-- Commit dots -->
+              <circle cx="15" cy="10" r="3" fill="#4CAF50"/>
+              <circle cx="15" cy="25" r="3" fill="#4CAF50"/>
+              <circle cx="35" cy="30" r="3" fill="#4CAF50"/>
+              <circle cx="15" cy="40" r="3" fill="#4CAF50"/>
+              <circle cx="50" cy="40" r="3" fill="#4CAF50"/>
+            </g>
+            
+            <!-- Success Checkmark -->
+            <circle cx="75" cy="25" r="12" fill="#4CAF50"/>
+            <path d="M70 25 L73 28 L80 21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <h2 class="title">{{ title }}</h2>
+      <p class="message">{{ message }}</p>
+      
+      <!-- Additional Success Details -->
+      <div class="success-details">
+        <div class="detail-item">
+          <span class="detail-icon">✅</span>
+          <span class="detail-text">Request submitted successfully</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon">🔄</span>
+          <span class="detail-text">Ready for Internal Review</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon">📧</span>
+          <span class="detail-text">Notifications sent to Reviewers</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Button -->
+    <div class="actions">
+      <button 
+        class="btn btn-primary" 
+        (click)="goToDashboard()"
+        type="button"
+      >
+        <span class="btn-icon">📊</span>
+        All MR
+      </button>
+    </div>
+
+    <!-- Close Button -->
+    <button class="close-btn" (click)="closeNotification()" type="button" aria-label="Close notification">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 2L2 14M2 2L14 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+</div>

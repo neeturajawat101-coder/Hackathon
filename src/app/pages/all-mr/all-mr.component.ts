@@ -37,31 +37,272 @@ export class AllMRComponent implements OnInit, AfterViewInit {
   }
 
   colDefs: ColDef[] = [
-    { field: 'mrId', headerName: 'MR ID', filter: 'agSetColumnFilter' },
-    { field: 'title', headerName: 'Title', filterParams: { suppressAndOrCondition: true, suppressFilterButton: true } },
-    { field: 'jiraLink', headerName: 'Jira' },
-    { field: 'webUrl', headerName: 'MR' },
-    { field: 'priority', headerName: 'Priority', filter: 'agSetColumnFilter' },
-    { field: 'squads', headerName: 'Squads', filter: 'agSetColumnFilter' },
-    { field: 'status', headerName: 'Status', filter: 'agSetColumnFilter' },
-    { field: 'reviewer', headerName: 'Reviewer' , filter: 'agSetColumnFilter' },
+    { 
+      field: 'mrId', 
+      headerName: 'MR ID', 
+      filter: false,
+      width: 100,
+      cellStyle: { fontWeight: '600', color: '#007bff' }
+    },
+    { 
+      field: 'title', 
+      headerName: 'Title', 
+      filter: false,
+      width: 300,
+      cellStyle: { fontWeight: '500' },
+      tooltipField: 'title'
+    },
+    { 
+      field: 'jiraLink', 
+      headerName: 'Jira',
+      filter: false,
+      width: 80,
+      cellRenderer: (params: any) => {
+        if (params.value && params.value !== '-') {
+          return `<a href="${params.value}" target="_blank" class="jira-link" style="color: #0052cc; text-decoration: none; font-weight: 500;">Jira</a>`;
+        }
+        return '<span style="color: #6c757d;">-</span>';
+      }
+    },
+    { 
+      field: 'webUrl', 
+      headerName: 'MR',
+      width: 80,
+      cellRenderer: (params: any) => {
+        if (params.value && params.value !== '-') {
+          return `<a href="${params.value}" target="_blank" class="mr-link" style="color: #28a745; text-decoration: none; font-weight: 500;">MR</a>`;
+        }
+        return '<span style="color: #6c757d;">-</span>';
+      }
+    },
+    { 
+      field: 'priority', 
+      headerName: 'Priority', 
+      filter: 'agSetColumnFilter',
+      width: 100,
+      cellRenderer: (params: any) => {
+        const priority = params.value || '-';
+        const priorityClass = priority.toLowerCase() === 'high' ? 'priority-high' : 
+                             priority.toLowerCase() === 'medium' ? 'priority-medium' : 
+                             priority.toLowerCase() === 'low' ? 'priority-low' : '';
+        return `<span class="priority-badge ${priorityClass}">${priority}</span>`;
+      }
+    },
+    { 
+      field: 'squads', 
+      headerName: 'Squads', 
+      filter: 'agSetColumnFilter',
+      width: 120
+    },
+    { 
+      field: 'status', 
+      headerName: 'Status', 
+      filter: 'agSetColumnFilter',
+      width: 120,
+      cellRenderer: (params: any) => {
+        const status = params.value || '-';
+        const statusClass = this.getStatusClass(status);
+        return `<span class="status-badge ${statusClass}">${status}</span>`;
+      }
+    },
+    { 
+      field: 'reviewer', 
+      headerName: 'Reviewer', 
+      filter: 'agSetColumnFilter',
+      width: 150
+    },
     { 
       field: 'aiSummary', 
       headerName: 'AI Summary',
+      filter: false,
+      width: 150,
+      minWidth: 140,
+      resizable: false,
       cellRenderer: (params: any) => {
         const button = document.createElement('button');
         button.className = 'ai-summary-btn';
         button.title = 'Generate AI Summary';
         button.innerHTML = '<span>🤖 AI Summary</span>';
+        button.style.cssText = `
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          padding: 6px 10px;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          width: 100%;
+          max-width: 130px;
+          text-align: center;
+        `;
         button.addEventListener('click', () => {
           this.generateSummary(params.data);
         });
+        button.addEventListener('mouseenter', () => {
+          button.style.transform = 'translateY(-1px)';
+          button.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+        });
+        button.addEventListener('mouseleave', () => {
+          button.style.transform = 'translateY(0)';
+          button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        });
         return button;
       }
-    },    { field: 'action', headerName: 'Action' }
+    },
+    {
+      field: 'refresh',
+      headerName: 'Refresh',
+      filter: false,
+      width: 100,
+      minWidth: 90,
+      resizable: false,
+      cellRenderer: (params: any) => {
+        const button = document.createElement('button');
+        button.className = 'refresh-mr-btn';
+        button.title = 'Refresh MR Data';
+        button.innerHTML = '<span>🔄</span>';
+        button.style.cssText = `
+          background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+          color: white;
+          border: none;
+          padding: 8px 10px;
+          border-radius: 6px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          width: 100%;
+          max-width: 80px;
+        `;
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          this.refreshSingleMR(params.data, event);
+        });
+        button.addEventListener('mouseenter', () => {
+          button.style.transform = 'translateY(-1px) rotate(90deg)';
+          button.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+        });
+        button.addEventListener('mouseleave', () => {
+          button.style.transform = 'translateY(0) rotate(0deg)';
+          button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        });
+        return button;
+      }
+    },
+    { 
+      field: 'action', 
+      headerName: 'Actions',
+      filter: false,
+      width: 100,
+      minWidth: 90,
+      resizable: false,
+      cellRenderer: (params: any) => {
+        const container = document.createElement('div');
+        container.style.cssText = 'display: flex; align-items: center; justify-content: center; gap: 8px; height: 100%;';
+        
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-btn';
+        deleteButton.title = 'Delete MR';
+        deleteButton.innerHTML = '<span>🗑️</span>';
+        deleteButton.style.cssText = `
+          background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+          color: white;
+          border: none;
+          padding: 6px 8px;
+          border-radius: 6px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          width: 100%;
+          max-width: 70px;
+        `;
+        deleteButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          this.deleteMR(params.data, event);
+        });
+        deleteButton.addEventListener('mouseenter', () => {
+          deleteButton.style.transform = 'translateY(-1px) scale(1.05)';
+          deleteButton.style.boxShadow = '0 4px 8px rgba(220,53,69,0.3)';
+        });
+        deleteButton.addEventListener('mouseleave', () => {
+          deleteButton.style.transform = 'translateY(0) scale(1)';
+          deleteButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        });
+        
+        container.appendChild(deleteButton);
+        return container;
+      }
+    }
   ];
 
   rowData: any = [];
+
+  // AG Grid configuration
+  defaultColDef: ColDef = {
+    flex: 1,
+    minWidth: 80,
+    resizable: true,
+    sortable: true,
+    filter: true,
+    filterParams: {
+      suppressAndOrCondition: true
+    }
+  };
+
+  gridOptions = {
+    animateRows: true,
+    enableCellTextSelection: true,
+    suppressRowClickSelection: true,
+    rowHeight: 50,
+    headerHeight: 45,
+    pagination: true,
+    paginationPageSize: 20,
+    suppressPaginationPanel: false,
+    suppressScrollOnNewData: true,
+    suppressHorizontalScroll: false,
+    suppressColumnVirtualisation: true,
+    rowStyle: { 
+      background: 'white',
+      borderBottom: '1px solid #e9ecef'
+    },
+    getRowStyle: (params: any) => {
+      if (params.node.rowIndex % 2 === 0) {
+        return { background: '#f8f9fa' };
+      }
+      return { background: 'white' };
+    },
+    onGridReady: (params: any) => {
+      // Auto-size columns on grid ready
+      params.api.sizeColumnsToFit();
+    },
+    onColumnResized: (params: any) => {
+      // Ensure columns don't get too small
+      params.api.sizeColumnsToFit();
+    }
+  };
+
+  onRowClicked(event: any): void {
+    // Navigate to MR details using the original data
+    //this.viewMRDetails(event.data.data || event.data);
+  }
+
+  onGridReady(params: any): void {
+    // Store grid API for later use
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+    
+    // Auto-size columns to fit
+    setTimeout(() => {
+      params.api.sizeColumnsToFit();
+    }, 100);
+  }
+
+  private gridApi: any;
+  private gridColumnApi: any;
 
   ngOnInit(): void {
     // Don't load data immediately, wait for AfterViewInit
@@ -95,7 +336,11 @@ export class AllMRComponent implements OnInit, AfterViewInit {
           status: mr.status,
           reviewer: mr.reviewer || mr.author || '-',
           aiSummary: '🤖 AI Summary',
-          action: mr.action
+          refresh: '🔄',
+          action: 'Actions',
+          // Keep reference to original data for operations
+          id: mr.id,
+          data: mr
         }));
         this.isLoading = false;
         
@@ -151,9 +396,9 @@ export class AllMRComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/input']);
   }
 
-  viewMRDetails(mr: MRData): void {
-    this.router.navigate(['/details'], { state: { mrData: mr } });
-  }
+  // viewMRDetails(mr: MRData): void {
+  //   this.router.navigate(['/details'], { state: { mrData: mr } });
+  // }
 
   getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
@@ -165,21 +410,39 @@ export class AllMRComponent implements OnInit, AfterViewInit {
     }
   }
 
-  deleteMR(mr: MRData, event: Event): void {
+  deleteMR(mr: any, event: Event): void {
     event.stopPropagation(); // Prevent row click
     
-    if (confirm(`Are you sure you want to delete "${mr.title}"?`)) {
-      if (mr.id) {
-        this.firebaseService.deleteMR(mr.id).subscribe({
+    // Use the original data if available
+    const mrData = mr.data || mr;
+    const mrTitle = mrData.title || mr.title || 'this MR';
+    const mrId = mrData.id || mr.id;
+    
+    if (confirm(`⚠️ Are you sure you want to delete "${mrTitle}"?\n\nThis action cannot be undone.`)) {
+      if (mrId) {
+        // Show loading state
+        const originalRowData = this.rowData;
+        this.rowData = this.rowData.map((row: any) => 
+          row.id === mrId ? { ...row, deleting: true } : row
+        );
+        
+        this.firebaseService.deleteMR(mrId).subscribe({
           next: () => {
             console.log('MR deleted successfully');
+            // Show success feedback
+            alert('✅ MR deleted successfully!');
             this.loadAllMRs(); // Reload the list
           },
           error: (error) => {
             console.error('Error deleting MR:', error);
-            this.errorMessage = `Failed to delete MR: ${error.message}`;
+            // Restore original data on error
+            this.rowData = originalRowData;
+            this.errorMessage = `❌ Failed to delete MR: ${error.message}`;
+            alert(`❌ Failed to delete MR: ${error.message}`);
           }
         });
+      } else {
+        alert('❌ Error: No MR ID found for deletion');
       }
     }
   }
@@ -298,15 +561,21 @@ export class AllMRComponent implements OnInit, AfterViewInit {
     });
   }
 
-  generateSummary(mr: MRData): void {
-    if (!mr.mrId) return;
+  generateSummary(mr: any): void {
+    // Use the original data if available
+    const mrData = mr.data || mr;
     
-    this.generatingSummary = mr.mrId;
+    if (!mrData.mrId && !mrData.mr) {
+      alert('❌ Error: No MR ID found for summary generation');
+      return;
+    }
+    
+    this.generatingSummary = mrData.mrId || mrData.mr;
     
     // Navigate to summary page with MR data in state (not URL)
     this.router.navigate(['/summary'], {
       state: {
-        mrData: mr
+        mrData: mrData
       }
     });
   }

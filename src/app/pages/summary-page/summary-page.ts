@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AIService, AISummaryResponse } from '../../services/ai.service';
 import { GitLabService, GitLabDiscussion, GitLabNote, MRAnalysisData } from '../../services/gitlab.service';
@@ -40,6 +40,7 @@ export class SummaryPageComponent implements OnInit {
   error: string | null = null;
   loadingStep = 0;
   magicParticles: Array<{x: number, y: number, symbol: string, delay: number}> = [];
+  isBrowser: boolean;
   
   parsedSummary: ParsedSummary = {
     keyInsights: [],
@@ -55,9 +56,11 @@ export class SummaryPageComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private aiService: AIService,
-    private gitlabService: GitLabService
+    private gitlabService: GitLabService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     console.log('🔥 SUMMARY PAGE CONSTRUCTOR CALLED 🔥');
+    this.isBrowser = isPlatformBrowser(this.platformId);
     
     // Initialize analysisData with a safe structure to prevent template errors
     this.analysisData = {
@@ -116,7 +119,7 @@ export class SummaryPageComponent implements OnInit {
     
     // Get MR data from router state instead of query parameters
     const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras?.state || window.history.state;
+    const state = navigation?.extras?.state || (this.isBrowser ? window.history.state : {});
     
     console.log('Navigation state:', state);
     console.log('MR data from state:', state?.['mrData']);

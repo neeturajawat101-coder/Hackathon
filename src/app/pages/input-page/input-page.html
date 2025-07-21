@@ -164,8 +164,13 @@
   <div *ngIf="errorMessage" class="error-message">
     {{ errorMessage }}
   </div>
-
-  <div *ngIf="successMessage" class="success-message">
-    {{ successMessage }}
-  </div>
 </div>
+
+<!-- Success Notification Popup -->
+<app-success-notification 
+  [show]="showNotification"
+  [title]="'Review Request Created!'"
+  [message]="'Your merge request has been successfully saved and is ready for review. You can view it in the dashboard.'"
+  (onGoToDashboard)="onGoToDashboard()"
+  (onClose)="onCloseNotification()">
+</app-success-notification>
