@@ -37,16 +37,28 @@ export class AllMRComponent implements OnInit, AfterViewInit {
   }
 
   colDefs: ColDef[] = [
-    { field: 'mrId', headerName: 'MR ID', filter: 'agTextColumnFilter', filterParams: { suppressAndOrCondition: true, suppressFilterButton: true } },
+    { field: 'mrId', headerName: 'MR ID', filter: 'agSetColumnFilter' },
     { field: 'title', headerName: 'Title', filterParams: { suppressAndOrCondition: true, suppressFilterButton: true } },
     { field: 'jiraLink', headerName: 'Jira' },
     { field: 'webUrl', headerName: 'MR' },
     { field: 'priority', headerName: 'Priority', filter: 'agSetColumnFilter' },
     { field: 'squads', headerName: 'Squads', filter: 'agSetColumnFilter' },
     { field: 'status', headerName: 'Status', filter: 'agSetColumnFilter' },
-    { field: 'reviewer', headerName: 'Reviewer' , filterParams: { suppressAndOrCondition: true, suppressFilterButton: true } },
-    { field: 'aiSummary', headerName: 'AI Summary' },
-    { field: 'action', headerName: 'Action' }
+    { field: 'reviewer', headerName: 'Reviewer' , filter: 'agSetColumnFilter' },
+    { 
+      field: 'aiSummary', 
+      headerName: 'AI Summary',
+      cellRenderer: (params: any) => {
+        const button = document.createElement('button');
+        button.className = 'ai-summary-btn';
+        button.title = 'Generate AI Summary';
+        button.innerHTML = '<span>🤖 AI Summary</span>';
+        button.addEventListener('click', () => {
+          this.generateSummary(params.data);
+        });
+        return button;
+      }
+    },    { field: 'action', headerName: 'Action' }
   ];
 
   rowData: any = [];
@@ -286,12 +298,10 @@ export class AllMRComponent implements OnInit, AfterViewInit {
     });
   }
 
-  generateSummary(mr: MRData, event: Event): void {
-    event.stopPropagation(); // Prevent row click
+  generateSummary(mr: MRData): void {
+    if (!mr.mrId) return;
     
-    if (!mr.id) return;
-    
-    this.generatingSummary = mr.id;
+    this.generatingSummary = mr.mrId;
     
     // Navigate to summary page with MR data in state (not URL)
     this.router.navigate(['/summary'], {
