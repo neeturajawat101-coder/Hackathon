@@ -1,12 +1,18 @@
-import { Component, OnInit, AfterViewInit, NgZone } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, AfterViewInit, NgZone, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { FirebaseService, MRData } from '../../services/firebase.service';
+import { AgGridAngular } from 'ag-grid-angular'; // Angular Data Grid Component
+import type { ColDef } from 'ag-grid-community'; // Column Definition Type Interface
+import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+import { SetFilterModule } from 'ag-grid-enterprise'; 
+
+ModuleRegistry.registerModules([ AllCommunityModule, SetFilterModule ]); 
 
 @Component({
   selector: 'app-all-mr',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AgGridAngular],
   templateUrl: './all-mr.component.html',
   styleUrls: ['./all-mr.component.scss']
 })
@@ -16,11 +22,31 @@ export class AllMRComponent implements OnInit, AfterViewInit {
   errorMessage: string = '';
   generatingSummary: string | null = null;
 
+  isBrowser: boolean;
+
   constructor(
     private firebaseService: FirebaseService,
     private router: Router,
-    private ngZone: NgZone
-  ) {}
+    private ngZone: NgZone,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
+
+  colDefs: ColDef[] = [
+    { field: 'mrId', headerName: 'MR ID', filter: 'agTextColumnFilter', filterParams: { suppressAndOrCondition: true, suppressFilterButton: true } },
+    { field: 'title', headerName: 'Title', filterParams: { suppressAndOrCondition: true, suppressFilterButton: true } },
+    { field: 'jiraLink', headerName: 'Jira' },
+    { field: 'webUrl', headerName: 'MR' },
+    { field: 'priority', headerName: 'Priority', filter: 'agSetColumnFilter' },
+    { field: 'squads', headerName: 'Squads', filter: 'agSetColumnFilter' },
+    { field: 'status', headerName: 'Status', filter: 'agSetColumnFilter' },
+    { field: 'reviewer', headerName: 'Reviewer' , filterParams: { suppressAndOrCondition: true, suppressFilterButton: true } },
+    { field: 'aiSummary', headerName: 'AI Summary' },
+    { field: 'action', headerName: 'Action' }
+  ];
+
+  rowData: any = [];
 
   ngOnInit(): void {
     // Don't load data immediately, wait for AfterViewInit
@@ -44,6 +70,18 @@ export class AllMRComponent implements OnInit, AfterViewInit {
     this.firebaseService.getAllMRs().subscribe({
       next: (data) => {
         this.mrList = data;
+        this.rowData = this.mrList.map(mr => ({
+          mrId: mr.mr || mr.mrId || '-',
+          title: mr.title,
+          jiraLink: mr.jira || mr.jiraLink || '-',
+          webUrl: mr.thread || mr.webUrl || '-',
+          priority: mr.priority || '-',
+          squads: mr.squads || '-',
+          status: mr.status,
+          reviewer: mr.reviewer || mr.author || '-',
+          aiSummary: '🤖 AI Summary',
+          action: mr.action
+        }));
         this.isLoading = false;
         
         if (data.length === 0) {

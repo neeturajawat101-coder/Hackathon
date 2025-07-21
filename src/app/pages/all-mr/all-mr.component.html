@@ -14,7 +14,15 @@
     </div>
   </div>
 
+  <ag-grid-angular 
+    *ngIf="isBrowser && !isLoading && !errorMessage"
+     style="height: 500px;"
+      [rowData]="rowData" 
+      [columnDefs]="colDefs">
+    </ag-grid-angular>
+
   <div class="table-container" *ngIf="!isLoading && !errorMessage">
+
     <table class="mr-table">
       <thead>
         <tr>
