@@ -76,7 +76,6 @@ export class AllMRComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     // Don't load data immediately, wait for AfterViewInit
-    this.openModal();
   }
 
   ngAfterViewInit(): void {
@@ -397,17 +396,4 @@ export class AllMRComponent implements OnInit, AfterViewInit {
       default: return 'Open';
     }
   }
-
-  openModal(data?: any): void {
-    const dialogRef = this.dialog.open(Modal, {
-      data: data,
-      width: '500px',
-      height: '400px'
-    });
-
-    dialogRef.closed.subscribe(result => {
-      console.log('Modal closed', result);
-    });
-  }
-
 }
