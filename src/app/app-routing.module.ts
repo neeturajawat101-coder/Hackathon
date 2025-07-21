@@ -1,17 +1,20 @@
-import { Routes } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 import { InputPageComponent } from './pages/input-page/input-page';
 import { MRDetailsPageComponent } from './pages/mrdetails-page/mrdetails-page';
 import { ReportsPageComponent } from './pages/reports-page/reports-page';
 import { DebugPageComponent } from './pages/debug-page/debug-page';
-import { AllMRComponent } from './pages/all-mr/all-mr.component';
-import { SummaryPageComponent } from './pages/summary-page/summary-page';
 
-export const routes: Routes = [
-  { path: '', redirectTo: 'all-mr', pathMatch: 'full' },
-  { path: 'all-mr', component: AllMRComponent },
+const routes: Routes = [
+  { path: '', redirectTo: 'debug', pathMatch: 'full' },
   { path: 'debug', component: DebugPageComponent },
   { path: 'input', component: InputPageComponent },
   { path: 'details', component: MRDetailsPageComponent },
   { path: 'reports', component: ReportsPageComponent },
-  { path: 'summary', component: SummaryPageComponent },
 ];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}

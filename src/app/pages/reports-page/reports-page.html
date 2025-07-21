@@ -1,0 +1,93 @@
+<div class="reports">
+  <h1>Reports</h1>
+  
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading reports data...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="reports-content">
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="card total-mrs">
+        <h3>Total MRs</h3>
+        <div class="count">{{ statusCounts.total }}</div>
+      </div>
+      
+      <div class="card open-mrs">
+        <h3>Open MRs</h3>
+        <div class="count">{{ statusCounts.open }}</div>
+      </div>
+      
+      <div class="card review-mrs">
+        <h3>In Cg Review</h3>
+        <div class="count">{{ statusCounts.inCgReview }}</div>
+      </div>
+      
+      <div class="card merged-mrs">
+        <h3>Merged</h3>
+        <div class="count">{{ statusCounts.merged }}</div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <!-- Monthly Trends Chart -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h3>📊 Monthly MR Merge Trends</h3>
+          <p>Merged MRs by actual merge date (only showing merged MRs based on merged_at field)</p>
+        </div>
+        
+        <div class="bar-chart">
+          <div class="chart-bars">
+            <div 
+              *ngFor="let trend of monthlyTrends" 
+              class="bar-container"
+            >
+              <div 
+                class="bar" 
+                [style.height.%]="(trend.count / getMaxTrendValue()) * 100"
+                [title]="trend.month + ': ' + trend.count + ' merged MRs'"
+              ></div>
+              <span class="bar-value">{{ trend.count }}</span>
+              <span class="bar-label">{{ trend.month }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Distribution Pie Chart -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h3>🎯 Current Month MR Status</h3>
+          <p>Distribution of MR statuses this month</p>
+        </div>
+        
+        <div class="pie-chart-container">
+          <div class="pie-chart">
+            <div class="pie-center">
+              <span class="total-count">{{ statusCounts.total }}</span>
+              <span class="total-label">Total MRs</span>
+            </div>
+          </div>
+          
+          <div class="legend">
+            <div 
+              *ngFor="let item of statusDistribution" 
+              class="legend-item"
+            >
+              <span 
+                class="legend-color" 
+                [style.background-color]="item.color"
+              ></span>
+              <span class="legend-text">{{ item.status }}</span>
+              <span class="legend-count">{{ item.count }}</span>
+              <span class="legend-percentage">{{ item.percentage }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

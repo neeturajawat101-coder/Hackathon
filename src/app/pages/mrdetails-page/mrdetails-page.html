@@ -1,0 +1,49 @@
+<div *ngIf="mrData; else noData">
+  <h2>Merge Request Details</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>MR ID</th>
+        <th>Title</th>
+        <th>Description</th>
+        <th>MR Link</th>
+        <th>Status</th>
+        <th>Author</th>
+        <th>Created</th>
+        <th>Updated</th>
+        <th>Target Branch</th>
+        <th>Source Branch</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ mrData.iid }}</td>
+        <td>{{ mrData.title }}</td>
+        <td>{{ mrData.description || 'No description' }}</td>
+        <td><a [href]="mrData.web_url" target="_blank">View MR</a></td>
+        <td>{{ mrData.state }}</td>
+        <td>{{ mrData.author?.name || 'Unknown' }}</td>
+        <td>{{ mrData.created_at | date:'short' }}</td>
+        <td>{{ mrData.updated_at | date:'short' }}</td>
+        <td>{{ mrData.target_branch }}</td>
+        <td>{{ mrData.source_branch }}</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div class="additional-info">
+    <h3>Additional Information</h3>
+    <p><strong>Merge Status:</strong> {{ mrData.merge_status }}</p>
+    <p><strong>Has Conflicts:</strong> {{ mrData.has_conflicts ? 'Yes' : 'No' }}</p>
+    <p><strong>Work in Progress:</strong> {{ mrData.work_in_progress ? 'Yes' : 'No' }}</p>
+    <p><strong>Labels:</strong> {{ getLabelsString() }}</p>
+    <p><strong>Assignees:</strong> {{ getAssigneesNames() }}</p>
+  </div>
+</div>
+
+<ng-template #noData>
+  <div class="no-data">
+    <p>No merge request data available. Please go back to the input page and fetch MR details.</p>
+    <button (click)="goBack()">Go Back to Input</button>
+  </div>
+</ng-template>

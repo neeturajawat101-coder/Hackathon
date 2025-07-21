@@ -1,0 +1,171 @@
+<div class="input-container">
+  <h2>Create CG Review Request</h2>
+  
+  <!-- MR ID Input Section -->
+  <div class="form-group" *ngIf="!showForm">
+    <label for="mrId">MR ID *</label>
+    <input 
+      id="mrId" 
+      type="text" 
+      [(ngModel)]="mrId" 
+      placeholder="e.g., 21144" 
+      [disabled]="isLoading"
+    />
+    
+    <button 
+      (click)="fetchMRDetails()" 
+      [disabled]="isLoading || !mrId.trim()"
+      [class.loading]="isLoading"
+      class="fetch-btn"
+    >
+      <span *ngIf="isLoading">Fetching...</span>
+      <span *ngIf="!isLoading">Fetch MR Details</span>
+    </button>
+  </div>
+
+  <!-- MR Details Form Section -->
+  <form *ngIf="showForm" class="mr-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="mrIdDisplay">MR ID *</label>
+        <input 
+          id="mrIdDisplay" 
+          type="text" 
+          [(ngModel)]="formData.mr" 
+          name="mr"
+          readonly
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="title">Title *</label>
+        <input 
+          id="title" 
+          type="text" 
+          [(ngModel)]="formData.title" 
+          name="title"
+          placeholder="Enter title"
+        />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="jira">Jira *</label>
+        <input 
+          id="jira" 
+          type="url" 
+          [(ngModel)]="formData.jira" 
+          name="jira"
+          placeholder="https://jira-enterprise.corp.entaingroup.com/browse/..."
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="mrDisplay">MR *</label>
+        <input 
+          id="mrDisplay" 
+          type="url" 
+          [(ngModel)]="formData.thread" 
+          name="mrDisplay"
+          placeholder="https://vie.git.bwinparty.com/vanilla/monorepo/-/merge_requests/..."
+          readonly
+        />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="priority">Priority *</label>
+        <select 
+          id="priority" 
+          [(ngModel)]="formData.priority" 
+          name="priority"
+        >
+          <option *ngFor="let priority of priorityOptions" [value]="priority">
+            {{ priority }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="squads">Squads *</label>
+        <input 
+          id="squads" 
+          type="text" 
+          [(ngModel)]="formData.squads" 
+          name="squads"
+          placeholder="e.g., MarketSquads"
+        />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="status">Status *</label>
+        <select 
+          id="status" 
+          [(ngModel)]="formData.status" 
+          name="status"
+        >
+          <option *ngFor="let status of statusOptions" [value]="status">
+            {{ status }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="reviewer">Reviewer</label>
+        <input 
+          id="reviewer" 
+          type="text" 
+          [(ngModel)]="formData.reviewer" 
+          name="reviewer"
+        />
+      </div>
+      
+      <div class="form-group" *ngIf="formData.mergedAt">
+        <label for="mergedAt">Merged Date</label>
+        <input 
+          id="mergedAt" 
+          type="text" 
+          [value]="formData.mergedAt | date:'medium'"
+          name="mergedAt"
+          readonly
+          class="readonly-field"
+        />
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button 
+        type="button"
+        (click)="resetForm()"
+        class="cancel-btn"
+        [disabled]="isLoading"
+      >
+        Cancel
+      </button>
+      
+      <button 
+        type="button"
+        (click)="saveToFirebase()"
+        [disabled]="isLoading"
+        [class.loading]="isLoading"
+        class="save-btn"
+      >
+        <span *ngIf="isLoading">Saving...</span>
+        <span *ngIf="!isLoading">Save to Firebase</span>
+      </button>
+    </div>
+  </form>
+  
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+  </div>
+</div>

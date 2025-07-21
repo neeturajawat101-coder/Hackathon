@@ -1,0 +1,106 @@
+<div class="all-mr-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>All MR ({{ mrList.length }})</h1>
+      <div class="header-actions">
+        <button class="refresh-btn" (click)="refreshData()" title="Refresh Data">
+          🔄 Refresh
+        </button>
+        <button class="create-btn" (click)="createCGReviewRequest()">
+          <span class="btn-icon">➕</span>
+          Create CG Review Request
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container" *ngIf="!isLoading && !errorMessage">
+    <table class="mr-table">
+      <thead>
+        <tr>
+          <th>MR ID</th>
+          <th>Title</th>
+          <th>Jira</th>
+          <th>MR</th>
+          <th>Priority</th>
+          <th>Squads</th>
+          <th>Status</th>
+          <th>Reviewer</th>
+          <th>AI Summary</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let mr of mrList" (click)="viewMRDetails(mr)" class="mr-row">
+          <td>{{ mr.mr || mr.mrId || '-' }}</td>
+          <td class="title-cell">{{ mr.title }}</td>
+          <td>
+            <a *ngIf="mr.jira || mr.jiraLink" [href]="mr.jira || mr.jiraLink" target="_blank" class="jira-link" (click)="$event.stopPropagation()">
+              Jira
+            </a>
+            <span *ngIf="!mr.jira && !mr.jiraLink" class="no-link">-</span>
+          </td>
+          <td>
+            <a *ngIf="mr.thread || mr.webUrl" [href]="mr.thread || mr.webUrl" target="_blank" class="mr-link" (click)="$event.stopPropagation()">
+              MR
+            </a>
+            <span *ngIf="!mr.thread && !mr.webUrl" class="no-link">-</span>
+          </td>
+          <td>{{ mr.priority || '-' }}</td>
+          <td>{{ mr.squads || '-' }}</td>
+          <td>
+            <span [class]="'status-badge ' + getStatusClass(mr.status)">
+              {{ mr.status }}
+            </span>
+          </td>
+          <td>{{ mr.reviewer || mr.author || '-' }}</td>
+          <td class="ai-summary-cell">
+            <button 
+              class="ai-summary-btn" 
+              (click)="generateSummary(mr, $event)"
+              [disabled]="generatingSummary === mr.id"
+              title="Generate AI Summary"
+            >
+              <span *ngIf="generatingSummary !== mr.id">🤖 AI Summary</span>
+              <span *ngIf="generatingSummary === mr.id" class="loading">Generating...</span>
+            </button>
+          </td>
+          <td class="action-cell">
+            <span class="action-text">{{ mr.action }}</span>
+            <button 
+              class="delete-btn" 
+              (click)="deleteMR(mr, $event)"
+              title="Delete MR"
+            >
+              🗑️
+            </button>
+          </td>
+        </tr>
+        
+        <!-- Empty state when no MRs -->
+        <tr *ngIf="mrList.length === 0" class="empty-row">
+          <td colspan="10" class="empty-cell">
+            <div class="empty-state">
+              <p>No merge requests found</p>
+              <button class="create-btn-secondary" (click)="createCGReviewRequest()">
+                Create your first CG Review Request
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading merge requests...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage" class="error-state">
+    <p>{{ errorMessage }}</p>
+    <button (click)="loadAllMRs()" class="retry-btn">Retry</button>
+  </div>
+</div>
