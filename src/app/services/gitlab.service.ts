@@ -90,9 +90,9 @@ export interface MRAnalysisData {
   providedIn: 'root',
 })
 export class GitLabService {
-  private gitlabApiUrl = '';
-    private gitlabToken = '';
-    private projectId = '';
+  private gitlabApiUrl = ' ';
+    private gitlabToken = ' ';
+    private projectId = ' ';
 
   constructor(private http: HttpClient) {}
 
